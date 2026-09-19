@@ -28,8 +28,8 @@ export interface AttendanceState {
   /** 연속 출석일(1~7). 8일째부터는 7 유지, 정책은 추후 확정. */
   streak: number
   lastCheckInAt: number | null
-  /** 이번 연속 구간의 출석 여부(길이 <= 7). */
-  history: boolean[]
+  /** 출석한 날짜('YYYY-MM-DD', 로컬 기준) 목록 — 월~일 그리드를 실제 날짜에 맞춰 그리기 위함. */
+  checkInDates: string[]
 }
 
 export interface GameState {

@@ -5,16 +5,25 @@ function isMaxLevel(costs: number[], level: number): boolean {
   return level - 1 >= costs.length
 }
 
-export function canUpgradeMiner(mineral: MineralState, mineralId: MineralId): boolean {
+/** 다음 레벨로 가는 데 필요한 비용. 이미 최대 레벨이면 null. */
+export function getMinerUpgradeCost(mineralId: MineralId, minerLevel: number): number | null {
   const costs = MINER[mineralId].upgradeCost
-  if (isMaxLevel(costs, mineral.minerLevel)) return false
-  return mineral.vaulted >= costs[mineral.minerLevel - 1]
+  return isMaxLevel(costs, minerLevel) ? null : costs[minerLevel - 1]
+}
+
+export function getVaultUpgradeCost(mineralId: MineralId, vaultLevel: number): number | null {
+  const costs = VAULT[mineralId].upgradeCost
+  return isMaxLevel(costs, vaultLevel) ? null : costs[vaultLevel - 1]
+}
+
+export function canUpgradeMiner(mineral: MineralState, mineralId: MineralId): boolean {
+  const cost = getMinerUpgradeCost(mineralId, mineral.minerLevel)
+  return cost != null && mineral.vaulted >= cost
 }
 
 export function canUpgradeVault(mineral: MineralState, mineralId: MineralId): boolean {
-  const costs = VAULT[mineralId].upgradeCost
-  if (isMaxLevel(costs, mineral.vaultLevel)) return false
-  return mineral.vaulted >= costs[mineral.vaultLevel - 1]
+  const cost = getVaultUpgradeCost(mineralId, mineral.vaultLevel)
+  return cost != null && mineral.vaulted >= cost
 }
 
 /** 업그레이드 비용은 해당 광물의 금고 보유량(vaulted)에서 차감한다. */

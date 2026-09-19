@@ -24,6 +24,6 @@ export function createInitialState(now: number): GameState {
     nextCollectMultiplier: 1,
     missions: createFreshMissions(),
     missionsResetAt: now,
-    attendance: { streak: 0, lastCheckInAt: null, history: [] },
+    attendance: { streak: 0, lastCheckInAt: null, checkInDates: [] },
   }
 }

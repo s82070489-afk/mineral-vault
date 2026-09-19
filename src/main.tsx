@@ -1,6 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { TDSMobileProvider, useUserAgent } from '@toss/tds-mobile'
+import { GameStateProvider } from './state/GameStateContext'
 import './index.css'
 import App from './App.tsx'
 
@@ -9,7 +10,9 @@ function Root() {
 
   return (
     <TDSMobileProvider userAgent={userAgent}>
-      <App />
+      <GameStateProvider>
+        <App />
+      </GameStateProvider>
     </TDSMobileProvider>
   )
 }

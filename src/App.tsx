@@ -1,11 +1,28 @@
-import { Text } from '@toss/tds-mobile'
+import { useState } from 'react'
+import { BottomTabBar, type TabId } from './components/BottomTabBar'
+import { MainScreen } from './screens/MainScreen'
+import { VaultScreen } from './screens/VaultScreen'
+import { BoosterScreen } from './screens/BoosterScreen'
+import { AttendanceScreen } from './screens/AttendanceScreen'
+import { colors } from './theme'
+
+const SCREENS: Record<TabId, () => JSX.Element> = {
+  main: MainScreen,
+  vault: VaultScreen,
+  booster: BoosterScreen,
+  attendance: AttendanceScreen,
+}
 
 function App() {
+  const [tab, setTab] = useState<TabId>('main')
+  const Screen = SCREENS[tab]
+
   return (
-    <div style={{ padding: 24 }}>
-      <Text typography="t5" fontWeight="bold">
-        금광 키우기 — 세팅 중
-      </Text>
+    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: colors.background }}>
+      <div style={{ flexGrow: 1 }}>
+        <Screen />
+      </div>
+      <BottomTabBar active={tab} onChange={setTab} />
     </div>
   )
 }

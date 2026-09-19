@@ -56,6 +56,20 @@ export function accrueMineral(
   }
 }
 
+/**
+ * 실제 상태는 건드리지 않고, 지금 이 순간(now) 기준 pending이 얼마일지 미리 계산만 한다.
+ * 화면의 "쌓이는" 실시간 카운터 연출에 쓰고, 저장되는 확정 값은 accrueAllMinerals가 담당한다.
+ */
+export function previewPending(
+  mineral: MineralState,
+  mineralId: MineralId,
+  now: number,
+  activeBoosters: BoosterState[],
+  bonusAccrualMsCredit: number,
+): number {
+  return accrueMineral(mineral, mineralId, now, activeBoosters, bonusAccrualMsCredit).mineral.pending
+}
+
 /** 모든 광물의 pending을 한 번에 정산하고, 만료된 부스터를 정리한다. */
 export function accrueAllMinerals(state: GameState, now: number): GameState {
   let remainingCredit = state.bonusAccrualMsCredit
