@@ -1,8 +1,8 @@
 import { MAX_OFFLINE_HOURS, MINER, VAULT, type MineralId } from '../config/gameConfig'
 import type { BoosterState, GameState, MineralState } from './types'
 
-const MS_PER_HOUR = 60 * 60 * 1000
-const MAX_OFFLINE_MS = MAX_OFFLINE_HOURS * MS_PER_HOUR
+const MS_PER_SECOND = 1000
+const MAX_OFFLINE_MS = MAX_OFFLINE_HOURS * 60 * 60 * 1000
 
 function statAtLevel(values: number[], level: number): number {
   return values[level - 1] ?? values[values.length - 1]
@@ -16,18 +16,18 @@ export function pruneExpiredBoosters(activeBoosters: BoosterState[], now: number
   return activeBoosters.filter((b) => b.expiresAt > now)
 }
 
-export function getMiningRatePerHour(
+export function getMiningRatePerSecond(
   mineralId: MineralId,
   minerLevel: number,
   activeBoosters: BoosterState[],
   now: number,
 ): number {
-  const base = statAtLevel(MINER[mineralId].values, minerLevel)
+  const base = statAtLevel(MINER[mineralId].miningPerSecond, minerLevel)
   return isBoosterActive(activeBoosters, 'miningSpeedX2', now) ? base * 2 : base
 }
 
 export function getVaultCapacity(mineralId: MineralId, vaultLevel: number): number {
-  return statAtLevel(VAULT[mineralId].values, vaultLevel)
+  return statAtLevel(VAULT[mineralId].capacity, vaultLevel)
 }
 
 /**
@@ -43,12 +43,12 @@ export function accrueMineral(
   activeBoosters: BoosterState[],
   bonusAccrualMsCredit: number,
 ): { mineral: MineralState; usedCredit: number } {
-  const ratePerHour = getMiningRatePerHour(mineralId, mineral.minerLevel, activeBoosters, now)
+  const ratePerSecond = getMiningRatePerSecond(mineralId, mineral.minerLevel, activeBoosters, now)
   const elapsedMs = Math.max(0, now - mineral.lastAccrualAt)
   const cap = MAX_OFFLINE_MS + bonusAccrualMsCredit
   const cappedMs = Math.min(elapsedMs, cap)
   const usedCredit = Math.max(0, Math.min(bonusAccrualMsCredit, elapsedMs - MAX_OFFLINE_MS))
-  const accrued = ratePerHour * (cappedMs / MS_PER_HOUR)
+  const accrued = ratePerSecond * (cappedMs / MS_PER_SECOND)
 
   return {
     mineral: { ...mineral, pending: mineral.pending + accrued, lastAccrualAt: now },

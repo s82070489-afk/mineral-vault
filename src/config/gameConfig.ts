@@ -34,30 +34,38 @@ export const MINERALS: MineralDef[] = [
 /** 앱을 꺼둔 동안에도 쌓이는 채굴량의 기본 상한(시간). */
 export const MAX_OFFLINE_HOURS = 8
 
-interface LeveledMineralStat {
-  /** index 0 = 레벨 1 값. 배열 길이가 최대 레벨(예: 길이 5면 최대 Lv.5). */
-  values: number[]
-}
-
-interface UpgradableStat extends LeveledMineralStat {
-  /** index 0 = 레벨 1→2 업그레이드 비용(해당 광물 소모). 길이는 values보다 1 작다. */
+interface MinerStat {
+  /**
+   * index 0 = 레벨 1의 초당 채굴량. 배열 길이가 최대 레벨(예: 길이 5면 최대 Lv.5).
+   * 기존 "시간당" 기획값을 절대량 그대로 유지한 채 /3600으로 환산한 값이라
+   * (예: 2 → 2/3600), 8시간 누적량 : 금고 용량 비율은 변하지 않는다.
+   */
+  miningPerSecond: number[]
+  /** index 0 = 레벨 1→2 업그레이드 비용(해당 광물 소모). 길이는 miningPerSecond보다 1 작다. */
   upgradeCost: number[]
 }
 
-/** 채굴기(채굴 속도) — 레벨별 시간당 채굴량과 레벨업 비용. */
-export const MINER: Record<MineralId, UpgradableStat> = {
-  coal: { values: [2, 3, 4.5, 6.5, 9], upgradeCost: [10, 20, 40, 80] },
-  silver: { values: [0.5, 0.8, 1.2, 1.8, 2.6], upgradeCost: [5, 10, 20, 40] },
-  gold: { values: [0.4, 0.8, 1.3, 2, 3], upgradeCost: [3, 6, 12, 24] },
-  diamond: { values: [0.05, 0.08, 0.12, 0.18, 0.26], upgradeCost: [1, 2, 4, 8] },
+interface VaultStat {
+  /** index 0 = 레벨 1 용량. 배열 길이가 최대 레벨. */
+  capacity: number[]
+  /** index 0 = 레벨 1→2 업그레이드 비용(해당 광물 소모). 길이는 capacity보다 1 작다. */
+  upgradeCost: number[]
+}
+
+/** 채굴기(채굴 속도) — 레벨별 초당 채굴량과 레벨업 비용. */
+export const MINER: Record<MineralId, MinerStat> = {
+  coal: { miningPerSecond: [2 / 3600, 3 / 3600, 4.5 / 3600, 6.5 / 3600, 9 / 3600], upgradeCost: [10, 20, 40, 80] },
+  silver: { miningPerSecond: [0.5 / 3600, 0.8 / 3600, 1.2 / 3600, 1.8 / 3600, 2.6 / 3600], upgradeCost: [5, 10, 20, 40] },
+  gold: { miningPerSecond: [0.4 / 3600, 0.8 / 3600, 1.3 / 3600, 2 / 3600, 3 / 3600], upgradeCost: [3, 6, 12, 24] },
+  diamond: { miningPerSecond: [0.05 / 3600, 0.08 / 3600, 0.12 / 3600, 0.18 / 3600, 0.26 / 3600], upgradeCost: [1, 2, 4, 8] },
 }
 
 /** 금고 — 레벨별 용량과 레벨업 비용. */
-export const VAULT: Record<MineralId, UpgradableStat> = {
-  coal: { values: [60, 90, 120, 160, 210], upgradeCost: [15, 30, 60, 120] },
-  silver: { values: [15, 25, 40, 60, 85], upgradeCost: [8, 16, 32, 64] },
-  gold: { values: [10, 15, 20, 27, 35], upgradeCost: [4, 8, 16, 32] },
-  diamond: { values: [2, 3, 4, 5, 6], upgradeCost: [1, 2, 4, 8] },
+export const VAULT: Record<MineralId, VaultStat> = {
+  coal: { capacity: [60, 90, 120, 160, 210], upgradeCost: [15, 30, 60, 120] },
+  silver: { capacity: [15, 25, 40, 60, 85], upgradeCost: [8, 16, 32, 64] },
+  gold: { capacity: [10, 15, 20, 27, 35], upgradeCost: [4, 8, 16, 32] },
+  diamond: { capacity: [2, 3, 4, 5, 6], upgradeCost: [1, 2, 4, 8] },
 }
 
 export type BoosterType = 'miningSpeedX2' | 'extraAccrualTime' | 'nextCollectX2'

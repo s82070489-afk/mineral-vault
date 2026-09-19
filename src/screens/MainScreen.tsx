@@ -1,12 +1,13 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { Button, Text } from '@toss/tds-mobile'
 import { ScreenContainer } from '../components/ScreenContainer'
 import { Card } from '../components/Card'
 import { ProgressBar } from '../components/ProgressBar'
+import { PreciseAmount } from '../components/PreciseAmount'
 import { useGameState } from '../state/GameStateContext'
 import { MINERALS, type MineralId } from '../config/gameConfig'
-import { getMiningRatePerHour, getVaultCapacity, previewPending } from '../game/mining'
-import { formatAmount, formatMineralAmount } from '../format'
+import { getMiningRatePerSecond, getVaultCapacity, previewPending } from '../game/mining'
+import { formatMineralAmount } from '../format'
 import { useNowTick } from '../hooks/useNowTick'
 import { colors } from '../theme'
 import { preloadFullScreenAd, showFullScreenAdForReward } from '../ads/fullScreenAd'
@@ -17,7 +18,7 @@ export function MainScreen() {
   const { state, collect } = useGameState()
   const [selected, setSelected] = useState<MineralId>('gold')
   const [adReady, setAdReady] = useState(false)
-  const now = useNowTick(1000)
+  const now = useNowTick(100)
 
   useEffect(() => {
     // '2배로 담기' 광고는 선택된 광물과 무관하게 같은 placement 하나라 마운트 시 한 번만 로드한다.
@@ -36,7 +37,7 @@ export function MainScreen() {
   const mineralDef = MINERALS.find((m) => m.id === selected)!
   const mineral = state.minerals[selected]
   const displayPending = previewPending(mineral, selected, now, state.activeBoosters, state.bonusAccrualMsCredit)
-  const ratePerHour = getMiningRatePerHour(selected, mineral.minerLevel, state.activeBoosters, now)
+  const ratePerSecond = getMiningRatePerSecond(selected, mineral.minerLevel, state.activeBoosters, now)
   const vaultCapacity = getVaultCapacity(selected, mineral.vaultLevel)
   const vaultRatio = vaultCapacity > 0 ? mineral.vaulted / vaultCapacity : 0
 
@@ -80,11 +81,11 @@ export function MainScreen() {
         </Text>
         <div style={{ marginTop: 4 }}>
           <Text typography="t1" fontWeight="bold">
-            {formatMineralAmount(displayPending, mineralDef.unit)}
+            <PreciseAmount value={displayPending} unit={mineralDef.unit} />
           </Text>
         </div>
         <Text typography="st5" fontWeight="semibold" color={colors.primaryWeakText}>
-          시간당 +{formatMineralAmount(ratePerHour, mineralDef.unit)} 채굴 중
+          초당 +<PreciseAmount value={ratePerSecond} unit={mineralDef.unit} /> 채굴 중
         </Text>
 
         <div style={{ marginTop: 16 }}>
@@ -129,14 +130,21 @@ export function MainScreen() {
       </Card>
 
       <Card style={{ padding: '4px 20px' }}>
-        <InfoRow label="채굴 속도" value={`시간당 ${formatAmount(ratePerHour)}${mineralDef.unit}`} />
+        <InfoRow
+          label="채굴 속도"
+          value={
+            <>
+              초당 <PreciseAmount value={ratePerSecond} unit={mineralDef.unit} />
+            </>
+          }
+        />
         <InfoRow label="채굴기 레벨" value={`Lv.${mineral.minerLevel}`} />
       </Card>
     </ScreenContainer>
   )
 }
 
-function InfoRow({ label, value }: { label: string; value: string }) {
+function InfoRow({ label, value }: { label: string; value: ReactNode }) {
   return (
     <div style={{ height: 56, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
       <Text typography="t7" color={colors.textSecondary}>
