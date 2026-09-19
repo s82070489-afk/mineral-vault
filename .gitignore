@@ -1,0 +1,16 @@
+# env
+.env
+.env.*
+!.env.example
+
+# dependencies
+node_modules/
+
+# build output
+dist/
+
+# apps-in-toss CLI artifacts & credentials
+*.ait
+.ait/
+.ait-build/
+ait-build/
